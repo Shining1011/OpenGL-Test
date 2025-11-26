@@ -1,0 +1,3 @@
+C:/Users/squiz/OpenGL-Test/OpenGL-Test/build/CMakeFiles/OpenGL_Test.dir
+C:/Users/squiz/OpenGL-Test/OpenGL-Test/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/squiz/OpenGL-Test/OpenGL-Test/build/CMakeFiles/ZERO_CHECK.dir
