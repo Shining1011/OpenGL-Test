@@ -1,0 +1,10 @@
+# VSCode
+.vscode/
+
+# Operating system files
+.DS_Store
+*.nfs
+*~
+
+# CMake
+build/
