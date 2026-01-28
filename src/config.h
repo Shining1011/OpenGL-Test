@@ -7,3 +7,4 @@
 #include "iostream"
 #include "fstream"
 #include <Shaders/shader.h>
+#include <StbImage/stb_image.h>
