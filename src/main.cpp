@@ -1,5 +1,7 @@
 #include "config.h"
 
+
+#pragma region Constant_Variables
 float vertices[] = {
 //  {       pos     }{       col      }{   tex   }
     0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
@@ -19,26 +21,6 @@ unsigned int indices[] = { // note that we start from 0!
 1, 2, 3 // second triangle
 };
 
-const char *vertexShaderSource = 
-"#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"void main()\n"
-"{\n"
-" gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-" ourColor = aColor;\n"
-"}\0";
-
-const char *fragmentShaderSource = 
-"#version 330 core\n"
-"in vec3 ourColor;\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-" FragColor = vec4(ourColor, 1.0);\n"
-"}\0";
-
 std::string projectPath = std::filesystem::current_path().parent_path().string();
 std::string vLocal = "/src/shader.vert";
 std::string fLocal = "/src/shader.frag";
@@ -52,54 +34,37 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0,0,width,height);
 }
 
+#pragma endregion
+
 class OpenGLTest{
     public:
         GLFWwindow* window;
 
-        int start(){
+        OpenGLTest(){
             glfwInitialize();
             int glfwWindow = this->glfwWindow();
-            if(glfwWindow == -1) return -1;
+            if(glfwWindow == -1){
+                std::cout << "GLFW WINDOW FAILED TO INITIALIZE" << std::endl;
+                return;
+            }
             int gladLoad = this->gladLoadFunctionPointers();
-            if(gladLoad == -1) return -1;
+            if(gladLoad == -1){
+                std::cout << "GLAD LOAD FAILED TO INITIALIZE" << std::endl;
+                return;
+            }
+            this->ourShader = new Shader(vShaderPath,fShaderPath);
             this->instantiateObjects();
             this->bindCopyObjects();
             this->linkVertexAttributes();
-            this->UnbindObjects();
-            // set texture parameters (wrapping, filtering, mipmaps)
-            // set per coordinate s,t,r = x,y,z
-            
-            // texture loading
-            glGenTextures(1, &(this->texture));
-            glBindTexture(GL_TEXTURE_2D, this->texture);
-            
-            // set texture option on currently bound textures
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-            
-            int width, height, nrChannels;
-            std::string fullTexPath = (projectPath+"/textures/wall.jpg");
-            unsigned char *data = stbi_load(fullTexPath.c_str(), &width, &height, &nrChannels, 0);
-
-            if(data){
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-                glGenerateMipmap(GL_TEXTURE_2D);
-            }
-            else{
-                std::cout << "Failed to load texture because " << stbi_failure_reason();
-            }
-
-            stbi_image_free(data);
-
-            Shader ourShader(vShaderPath,fShaderPath);
+            this->unbindObjects();
+            this->loadText(&texture1, "container.jpg", GL_RGB);
+            stbi_set_flip_vertically_on_load(true);
+            this->loadText(&texture2, "awesomeface.png", GL_RGBA);
             // activate shader
-            ourShader.use();
-
-            return 0;
+            (*ourShader).use();
+            glUniform1i(glGetUniformLocation((*ourShader).ID, "texture_1"), 0);
+            (*ourShader).setInt("texture_2", 1);
+            return;
         }
 
         int update(){
@@ -112,10 +77,14 @@ class OpenGLTest{
             glClear(GL_COLOR_BUFFER_BIT);
 
             // use shader program
-            //this->ourShader.use();
+            (*ourShader).use();
 
             // draw triangle
-            glBindTexture(GL_TEXTURE_2D, this->texture);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, this->texture1);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, this->texture2);
+
             glBindVertexArray(this->VAO);
             //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
             // glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -136,7 +105,8 @@ class OpenGLTest{
 
     private:
         unsigned int VBO, VAO, EBO;
-        unsigned int texture;
+        unsigned int texture1, texture2;
+        Shader* ourShader;
         const unsigned int SCREEN_WIDTH = 800;
         const unsigned int SCREEN_HEIGHT = 600;
 
@@ -199,10 +169,41 @@ class OpenGLTest{
             glEnableVertexAttribArray(2);
         }
 
-        void UnbindObjects(){
+        void unbindObjects(){
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
+        void loadText(unsigned int* texture, std::string textName, unsigned int dataType){
+            // loading texture 1
+            glGenTextures(1, texture);
+            glBindTexture(GL_TEXTURE_2D, *texture);
+
+            // set texture parameters (wrapping, filtering, mipmaps)
+            // set per coordinate s,t,r = x,y,z
+            // set texture option on currently bound textures
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+
+            int width, height, nrChannels;
+            std::string fullTexPath = (projectPath+"/textures/" + textName);
+            unsigned char *data = stbi_load(fullTexPath.c_str(), &width, &height, &nrChannels, 0);
+
+            if(data){
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, 
+                    dataType, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+            }
+            else{
+                std::cout << "Failed to load texture because " << stbi_failure_reason();
+            }
+
+            stbi_image_free(data);
         }
 
         void deleteObjects(){
@@ -215,7 +216,6 @@ class OpenGLTest{
 
 int main(){
     OpenGLTest app;
-    if(app.start() == -1) return -1;
     while(!glfwWindowShouldClose(app.window)){
         if(app.update() == -1) return -1;
     }
