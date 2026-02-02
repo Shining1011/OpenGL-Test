@@ -64,6 +64,7 @@ class OpenGLTest{
             (*ourShader).use();
             glUniform1i(glGetUniformLocation((*ourShader).ID, "texture_1"), 0);
             (*ourShader).setInt("texture_2", 1);
+            adjustMixFactor(0);
             return;
         }
 
@@ -104,6 +105,7 @@ class OpenGLTest{
         }
 
     private:
+        float mixFactor = 20.0f;
         unsigned int VBO, VAO, EBO;
         unsigned int texture1, texture2;
         Shader* ourShader;
@@ -113,6 +115,12 @@ class OpenGLTest{
         void processInput(GLFWwindow *window){
             if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
                 glfwSetWindowShouldClose(this->window, true);
+            }
+            if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+                adjustMixFactor(1);
+            }
+            else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+                adjustMixFactor(-1);
             }
         }
 
@@ -183,8 +191,8 @@ class OpenGLTest{
             // set texture parameters (wrapping, filtering, mipmaps)
             // set per coordinate s,t,r = x,y,z
             // set texture option on currently bound textures
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
@@ -204,6 +212,12 @@ class OpenGLTest{
             }
 
             stbi_image_free(data);
+        }
+
+        void adjustMixFactor(int percent){
+                if(mixFactor+percent<=100.0f && mixFactor+percent>=0.0f ){mixFactor = mixFactor + percent;}
+                std::cout << mixFactor << std::endl;
+                glUniform1f(glGetUniformLocation((*ourShader).ID, "mixFactor"), mixFactor/100.0f);
         }
 
         void deleteObjects(){
