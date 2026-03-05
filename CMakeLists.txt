@@ -13,6 +13,5 @@ pkg_check_modules(GLFW REQUIRED glfw3)
 target_include_directories(OpenGL_Test PRIVATE ${GLFW_INCLUDE_DIRS})
 target_link_libraries(OpenGL_Test PRIVATE ${GLFW_LIBRARIES})
 
-
 # Windows os
 # target_link_libraries(OpenGL_Test PRIVATE ${PROJECT_SOURCE_DIR}\\dependencies\\lib\\glfw3.lib)
