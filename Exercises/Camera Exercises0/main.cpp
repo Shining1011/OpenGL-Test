@@ -103,7 +103,7 @@ class OpenGLTest{
                 return;
             }
             this->ourShader = new Shader(vShaderPath,fShaderPath);
-            this->camera = Camera(FPS, (static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)));
+            this->camera = Camera(FPS);
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             glfwSetWindowUserPointer(window, this);
             glfwSetCursorPosCallback(window, mouse_callback);
