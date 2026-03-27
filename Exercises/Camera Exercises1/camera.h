@@ -4,6 +4,8 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -131,14 +133,18 @@ public:
     void MoveFPS(Camera_Movement direction, float deltaTime){
         float velocity = MovementSpeed * deltaTime;
         glm::vec3 restriction = glm::vec3(1.0f, 0.0f, 1.0f);
-        if (direction == FORWARD)
-            Position += Front * velocity * restriction;
-        if (direction == BACKWARD)
-            Position -= Front * velocity * restriction;
-        if (direction == LEFT)
-            Position -= Right * velocity * restriction;
-        if (direction == RIGHT)
-            Position += Right * velocity * restriction;
+        if (direction == FORWARD){
+            Position += glm::normalize(Front * restriction) * velocity;
+        }
+        if (direction == BACKWARD){
+            Position -= glm::normalize(Front * restriction) * velocity;
+        }
+        if (direction == LEFT){
+            Position -= glm::normalize(Right * restriction) * velocity;
+        }
+        if (direction == RIGHT){
+            Position += glm::normalize(Right * restriction) * velocity;
+        }
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.

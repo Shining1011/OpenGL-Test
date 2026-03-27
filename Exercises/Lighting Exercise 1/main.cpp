@@ -246,18 +246,23 @@ class OpenGLTest{
                 glfwSetWindowShouldClose(this->window, true);
             }
 
-            glm::vec3 restriction = glm::vec3(1.0f, 0.0f, 1.0f);
+            // glm::vec3 cameraRight = glm::normalize(glm::cross(this->cameraUp, this->cameraFront));
+
             if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
                 this->camera.ProcessKeyboard(FORWARD, this->deltaTime);
+                // this->cameraPos += cameraFront*this->cameraSpeed*this->deltaTime;
             }
             if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
                 this->camera.ProcessKeyboard(BACKWARD, this->deltaTime);
+                // this->cameraPos -= cameraFront*this->cameraSpeed*this->deltaTime;
             }
             if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
                 this->camera.ProcessKeyboard(LEFT, this->deltaTime);
+                // this->cameraPos += cameraRight*this->cameraSpeed*this->deltaTime;
             }
             if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-                this->camera.ProcessKeyboard(RIGHT, this->deltaTime); 
+                this->camera.ProcessKeyboard(RIGHT, this->deltaTime);
+                // this->cameraPos -= cameraRight*this->cameraSpeed*this->deltaTime;
             }
         }
 
@@ -388,7 +393,7 @@ class OpenGLTest{
         }
 
         void drawObjects(){
-            float scalar = abs(glfwGetTime());
+            float scalar = abs(glfwGetTime()) * 2.0f;
             float factor = 10.0f;
             lightPos.x += factor * cos(scalar) * this->deltaTime;
             lightPos.z += factor * sin(scalar) * this->deltaTime;
@@ -408,7 +413,6 @@ class OpenGLTest{
             (*ourShader).setMat4("projection", this->projection);
             (*ourShader).setMat4("view", this->view);
             this->model = glm::mat4(1.0);
-            this->model = glm::translate(this->model, glm::vec3(0.0f, 0.0f, 1.0f));
             (*ourShader).setMat4("model", this->model);
 
             // (*ourShader).setInt("texture1", 0);

@@ -6,19 +6,15 @@ layout (location = 2) in vec2 aTextCoord;
 out vec3 normal;
 out vec2 textCoord;
 out vec3 FragPos;
-out vec3 LightPos;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform vec3 lightPos;
-
 void main()
 {
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
-	normal = mat3(transpose(inverse(view * model))) * aNormal;
+	normal = mat3(transpose(inverse(model))) * aNormal;
 	textCoord = aTextCoord;
-	FragPos = vec3(view * model * vec4(aPos, 1.0));
-	LightPos = vec3(view * vec4(lightPos, 1.0));
+	FragPos = vec3(model * vec4(aPos, 1.0));
 }
