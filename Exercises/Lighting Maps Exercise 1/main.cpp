@@ -139,21 +139,17 @@ class OpenGLTest{
             
             this->loadText(&texture1, "container2.png", GL_RGBA, GL_TEXTURE0);
             this->loadText(&specular1, "container2_specular.png", GL_RGBA, GL_TEXTURE1);
-            this->loadText(&emission1, "matrix.jpg", GL_RGB, GL_TEXTURE2);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture1);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, specular1);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, emission1);
             glBindVertexArray(VAO);
 
             // activate shader
             (*ourShader).use();
             (*ourShader).setInt("material.diffuse", 0);
             (*ourShader).setInt("material.specular", 1);
-            (*ourShader).setInt("emission", 2);
 
             glEnable(GL_DEPTH_TEST);
             return;
@@ -193,7 +189,6 @@ class OpenGLTest{
         unsigned int VBO, VAO, EBO;
         unsigned int texture1;
         unsigned int specular1;
-        unsigned int emission1;
         Shader* ourShader;
         Shader* ourLightShader;
         const unsigned int SCREEN_WIDTH = 800;
@@ -412,11 +407,6 @@ class OpenGLTest{
             glBindTexture(GL_TEXTURE_2D, this->texture1);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, this->specular1);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, this->emission1);
-
-            (*ourShader).setInt("material.emission", 2);
-
             (*ourShader).setInt("material.diffuse", 0);
             (*ourShader).setInt("material.specular", 1);
             (*ourShader).setFloat("material.shininess", 32.0f);
