@@ -137,15 +137,20 @@ class OpenGLTest{
 
             this->setupObjects();
             
-            this->loadText(&texture1, "container2.png", GL_RGBA, GL_TEXTURE0);
+            this->loadText(&texture1, "container.jpg", GL_RGB, GL_TEXTURE0);
+            stbi_set_flip_vertically_on_load(true);
+            this->loadText(&texture2, "awesomeface.png", GL_RGBA, GL_TEXTURE1);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture1);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture2);
             glBindVertexArray(VAO);
 
             // activate shader
             (*ourShader).use();
-            (*ourShader).setInt("material.diffuse", 0);
+            (*ourShader).setInt("texture1", 0);
+            (*ourShader).setInt("texture2", 1);
 
             glEnable(GL_DEPTH_TEST);
             return;
@@ -388,9 +393,13 @@ class OpenGLTest{
             lightPos.x += factor * cos(scalar) * this->deltaTime;
             lightPos.z += factor * sin(scalar) * this->deltaTime;
 
-            glm::vec3 lightColor = glm::vec3(1.0f);
+            glm::vec3 lightColor;
+            lightColor.x = sin(glfwGetTime() * 2.0f);
+            lightColor.y = sin(glfwGetTime() * 0.7f);
+            lightColor.z = sin(glfwGetTime() * 1.3f);
 
             glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+            glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
             // lightPos.z *= cos(scalar);
 
@@ -401,7 +410,8 @@ class OpenGLTest{
             
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, this->texture1);
-            (*ourShader).setInt("material.diffuse", 0);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, this->texture2);
             
             (*ourShader).setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
             (*ourShader).setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
@@ -409,9 +419,9 @@ class OpenGLTest{
             (*ourShader).setFloat("material.shininess", 32.0f);
             
             (*ourShader).setVec3("light.position", lightPos);
-            (*ourShader).setVec3("light.ambient", diffuseColor);
+            (*ourShader).setVec3("light.ambient", ambientColor);
             (*ourShader).setVec3("light.diffuse", diffuseColor);
-            (*ourShader).setVec3("light.specular", glm::vec3(1.0f));
+            (*ourShader).setVec3("light.specular", lightColor * 3.0f);
 
             (*ourShader).setVec3("viewPos", this->camera.Position);
             (*ourShader).setMat4("projection", this->projection);
